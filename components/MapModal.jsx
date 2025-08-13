@@ -115,7 +115,7 @@
 // });
 
 
-import { StyleSheet, Text, View, TouchableOpacity, Linking } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Linking, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Roboto_400Regular } from '@expo-google-fonts/roboto/400Regular';
 import { Roboto_500Medium } from '@expo-google-fonts/roboto/500Medium';
@@ -123,8 +123,10 @@ import { Roboto_600SemiBold } from '@expo-google-fonts/roboto/600SemiBold';
 import { Roboto_700Bold } from '@expo-google-fonts/roboto/700Bold';
 import { Roboto_800ExtraBold } from '@expo-google-fonts/roboto/800ExtraBold';
 import { useFonts } from "expo-font";
+import { useState } from "react";
 
 export default function MapModal({visible, onClose, atmData, expanded, onToggleExpand}){
+  const [isExpanded, setIsExpanded] = useState(expanded);
   let [fontsLoaded] = useFonts({ 
     Roboto_400Regular, 
     Roboto_500Medium, 
@@ -160,18 +162,35 @@ export default function MapModal({visible, onClose, atmData, expanded, onToggleE
         </View>
         <View style={styles.distanceView}>
           <Text style={styles.distanceText}><Text style={styles.distance}>{atmData.distance.toFixed(2)} km </Text>away from your current location</Text>
-          <View style={styles.directionsView}>
-            <TouchableOpacity onPress={() => Linking.openURL(atmData.google_maps_url)}>
+          <View>
+            <TouchableOpacity style={styles.directionsView} onPress={() => Linking.openURL(atmData.google_maps_url)}>
               <Ionicons name="navigate" size={20} color="blue" />
-            </TouchableOpacity>
-            <Text style={styles.directionsText}>Directions</Text>
+              <Text style={styles.directionsText}>Directions</Text>
+            </TouchableOpacity>            
           </View>
         </View>
+          {isExpanded && (
+        <View style={styles.servicesView}>
+          <Text style={styles.servicesText}>Services</Text>
+          
+          {atmData.services && atmData.services.length > 0 ? 
+            (
+              atmData.services.map((service, index) => (
+                <View key={index} style={styles.serviceItem}>
+                  <Text style={styles.serviceBullet}>•</Text>
+                  <Text style={styles.serviceName}>{service}</Text>
+                </View>
+                )
+              )
+            ) :
+            <Text style={styles.serviceName}>No services available</Text>
+          }
+        </View>
+      )}
       </View>
-
       <View style={styles.expandContentIconView}>
         <TouchableOpacity>
-          <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={20} color="#000" onPress={onToggleExpand} />
+          <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={20} color="#434040" onPress={() => setIsExpanded(!isExpanded)} />
         </TouchableOpacity>
       </View>
       </View>)      
@@ -239,7 +258,7 @@ function getStyles(fontsLoaded) {
   },
   addressView: {
     //backgroundColor: 'green',
-    marginTop: 10,
+    marginTop: 20,
   },
   addressText: {
     fontSize: 16,
@@ -248,7 +267,7 @@ function getStyles(fontsLoaded) {
   },  
   distanceView: {
     //backgroundColor: 'yellow',  
-    marginTop: 10,
+    marginTop: 20,
   },
 
   distanceText: {
@@ -263,12 +282,39 @@ function getStyles(fontsLoaded) {
   directionsView: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    justifyContent: 'flex-start',
+    marginTop: 20,
   },
   directionsText: {
     color: 'blue',
     fontFamily: fontsLoaded ? 'Roboto_400Regular' : 'System',
-    fontSize: 14, 
+    fontSize: 14,
+    marginLeft: 3, 
+  },
+  servicesView: {
+    marginTop: 20,
+  },
+  servicesText: {
+    fontSize: 16,
+    color: '#434040',
+    fontFamily: fontsLoaded ? 'Roboto_500Medium' : 'System', 
+    marginBottom: 3,
+  },
+  serviceItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start', 
+  },
+  serviceBullet: {
+    fontSize: 25,
+    color: '#434040',
+    marginLeft: 20,
+    marginRight: 5,
+  },
+  serviceName: {
+    fontFamily: fontsLoaded ? 'Roboto_400Regular' : 'System', 
+    fontSize: 16,
+    color: '#434040',
+    marginTop: 5,
   },
   expandContentIconView: {
     //backgroundColor: 'purple',
@@ -277,47 +323,7 @@ function getStyles(fontsLoaded) {
 
 
 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-    justifyContent: 'flex-end'
-  },
-  titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold'
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
   
-  address: {
-    fontSize: 16,
-    color: '#333',
-    marginTop: 4
-  },
-
-  // distance: {
-  //   fontSize: 14,
-  //   fontWeight: '600',
-  //   marginTop: 4
-  // },
-  directionsRow: {
-    flexDirection: 'row',
-    fontSize: 14,
-    alignItems: 'center',
-    marginTop: 6
-  },
-  // directionsText: {
-  //   marginLeft: 4,
-  //   color: 'blue',
-  // },
   });
   return styles;
 }

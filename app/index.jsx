@@ -34,6 +34,8 @@ export default function HomeScreen () {
           longitudeDelta: 0.0121,
         });
 
+
+        //Fetch ATMs from the server
         const response = await fetch(`${BASE_URL}/get_atms.php`);
         const data = await response.json();
 
@@ -54,28 +56,28 @@ export default function HomeScreen () {
           const longitude = parseFloat(atm.lng);
           const google_maps_url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
           const distance = calculateDistance(userLatitude, userLongitude, atm.lat, atm.lng);
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            closestId = atm.id;
-            closestAtm = atm
-          }
-          return {
+          const formattedAtm = {
             ...atm,
             distance,
             google_maps_url,
             lat: latitude, // Add distance to each ATM
             lng: longitude, // Add distance to each ATM
           }
-        });
 
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestId = atm.id;
+            closestAtm = formattedAtm
+          }
+          return formattedAtm
+        });
+        
+      
         setAtms(formattedAtms);
         setClosestAtmId(closestId);
 
         if(closestAtm){
-          setSelectedAtm({
-            ...closestAtm,
-            distance: closestDistance,
-          });
+          setSelectedAtm(closestAtm);
           setModalVisible(true);
         }
 
@@ -130,24 +132,24 @@ export default function HomeScreen () {
         const isClosest = atm.id === closestAtmId;
         return (      
           <Marker
-          key = {atm.id}
-          coordinate={{
-            latitude: atm.lat,
-            longitude: atm.lng
-          }}
-          title={atm.name_and_loc}
-          onPress={() => {
-            setSelectedAtm(atm);
-            setModalVisible(true);
-          }}
-          >
+            key = {atm.id}
+            coordinate={{
+              latitude: atm.lat,
+              longitude: atm.lng
+            }}
+            onPress={() => {
+              setSelectedAtm(atm);
+              setModalVisible(true);
+            }}
+            title={atm.name_and_loc}
+            >
             <Image
                 source={isClosest ? require('../assets/images/atm-green.png') : require('../assets/images/atm-blue.png')}
                 style={{
                   width: isClosest ? 40 : 35,
                   height: isClosest ? 40 : 35,
                 }}
-              />
+            />
           </Marker>
       )
       })}  
@@ -160,6 +162,7 @@ export default function HomeScreen () {
         visible={modalVisible}
         atmData={selectedAtm}
         onClose={() => setModalVisible(false)}
+        expanded={false}
       />
     {/* </View> */}
    </View>
