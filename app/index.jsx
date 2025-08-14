@@ -30,8 +30,8 @@ export default function HomeScreen () {
         setRegion({
           latitude: userLatitude,
           longitude: userLongitude,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.0121,
+          latitudeDelta: 0.5,
+          longitudeDelta: 0.5,
         });
 
 
@@ -46,39 +46,20 @@ export default function HomeScreen () {
         
        
 
-        //Find the cosest ATM to the user's location
-        let closestId = null;
-        let closestDistance = Infinity;
-        let closestAtm = null;
-
-        const formattedAtms = data.data.map(atm => {
-          const latitude = parseFloat(atm.lat);
-          const longitude = parseFloat(atm.lng);
-          const google_maps_url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-          const distance = calculateDistance(userLatitude, userLongitude, atm.lat, atm.lng);
-          const formattedAtm = {
-            ...atm,
-            distance,
-            google_maps_url,
-            lat: latitude, // Add distance to each ATM
-            lng: longitude, // Add distance to each ATM
-          }
-
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            closestId = atm.id;
-            closestAtm = formattedAtm
-          }
-          return formattedAtm
-        });
+        const formattedAtms = formatAtms(data.data, userLatitude, userLongitude);
+        const { closestId, closestAtm } = getClosestAtm(formattedAtms, userLatitude, userLongitude);
         
-      
         setAtms(formattedAtms);
         setClosestAtmId(closestId);
-
         if(closestAtm){
           setSelectedAtm(closestAtm);
           setModalVisible(true);
+          setRegion({
+          latitude: closestAtm.lat,
+          longitude: closestAtm.lng,
+          latitudeDelta: 0.015,
+          longitudeDelta: 0.0121,
+        });
         }
 
       } catch(error) {
@@ -91,19 +72,24 @@ export default function HomeScreen () {
     setUp();
   }, []);
 
-  //Function to calculate the distance between two coordinates
-  function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of the Earth in kilometers
-    const toRad = (deg) => deg * (Math.PI / 180);
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = 
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  function getNearbyAtms(atms){
+    return atms.filter(atm => inBounds(atm));
   }
 
+  function inBounds(atm) {
+    if (!region) return false;
+    const { latitude, longitude, latitudeDelta, longitudeDelta } = region;
+    const latMin = latitude - latitudeDelta / 2;
+    const latMax = latitude + latitudeDelta / 2;
+    const lonMin = longitude - longitudeDelta / 2;
+    const lonMax = longitude + longitudeDelta / 2;
+
+    return (
+      atm.lat >= latMin && atm.lat <= latMax &&
+      atm.lng >= lonMin && atm.lng <= lonMax
+    );
+  }
+  
   if(loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -185,3 +171,50 @@ const styles = StyleSheet.create({
    backgroundColor: '#fff',
  },
 });
+
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the Earth in kilometers
+    const toRad = (deg) => deg * (Math.PI / 180);
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  }
+
+
+function formatAtms(atms, userLatitude, userLongitude) {
+  return atms.map(atm => {
+    const latitude = parseFloat(atm.lat);
+    const longitude = parseFloat(atm.lng);
+    const google_maps_url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}(${encodeURIComponent(atm.name_and_loc)})`;
+    const distance = calculateDistance(userLatitude, userLongitude, latitude, longitude);
+    return {
+      ...atm,
+      distance,
+      google_maps_url,
+      lat: latitude,
+      lng: longitude,
+    };
+  });
+}
+
+export function getClosestAtm(atms, userLatitude, userLongitude) {
+  let closestId = null;
+  let closestDistance = Infinity;
+  let closestAtm = null;
+
+  atms.forEach(atm => {
+    const distance = calculateDistance(userLatitude, userLongitude, atm.lat, atm.lng);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestId = atm.id;
+      closestAtm = atm;
+    }
+  });
+
+  return { closestId, closestAtm };
+}
