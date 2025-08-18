@@ -33,8 +33,12 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ], 
-      "expo-font"
+      ],
+      [
+        "./withReactNativeMaps.js"
+      ],
+      "expo-font",
+      "expo-maps"
     ],
     "experiments": {
       "typedRoutes": true
