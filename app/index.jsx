@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import * as Location from 'expo-location';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_DEFAULT, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapModel from '../components/MapModal';
 
 export default function HomeScreen() {
@@ -14,7 +14,7 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedAtm, setSelectedAtm] = useState(null);
   const lastRegionRef = useRef(null);
-  const BASE_URL = "http://192.168.100.6/atm-tracker-web/atm-api/api";
+  const BASE_URL = "http://10.244.249.4/atm-tracker-web/atm-api/api";
 
   //Get the user's current location
   useEffect(() => {
@@ -136,7 +136,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <MapView
-        provider={PROVIDER_DEFAULT}
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         region={region}
         showsUserLocation={true}

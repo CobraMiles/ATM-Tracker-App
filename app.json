@@ -12,11 +12,17 @@
       "supportsTablet": true
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyD6cFYXbOg5qbKq8kPbufu4Yv3cfe0lvr0"
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.atmtrackerapp"
     },
     "web": {
       "bundler": "metro",
@@ -33,9 +39,6 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ],
-      [
-        "./withReactNativeMaps.js"
       ],
       "expo-font",
       "expo-maps"
