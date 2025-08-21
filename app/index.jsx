@@ -1,8 +1,8 @@
-import { Image } from 'expo-image';
 import * as Location from 'expo-location';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, PROVIDER_DEFAULT, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import ATMMarker from '../components/ATMMarker';
 import MapModel from '../components/MapModal';
 
 export default function HomeScreen() {
@@ -146,26 +146,42 @@ export default function HomeScreen() {
         {nearbyAtms.map((atm) => {
           const isClosest = atm.id === closestAtmId;
           return (
-            <Marker
-              key={atm.id}
-              coordinate={{
-                latitude: atm.lat,
-                longitude: atm.lng
-              }}
-              onPress={() => {
-                setSelectedAtm(atm);
-                setModalVisible(true);
-              }}
-              title={atm.name_and_loc}
-            >
-              <Image
-                source={isClosest ? require('../assets/images/atm-green.png') : require('../assets/images/atm-blue.png')}
-                style={{
-                  width: isClosest ? 40 : 35,
-                  height: isClosest ? 40 : 35,
-                }}
-              />
-            </Marker>
+            <ATMMarker
+              key = {atm.id}
+              atm = {atm}
+              isClosest={isClosest}
+              isSelected={selectedAtm?.id === atm.id}
+              onPress={() => setSelectedAtm(atm)}
+            />
+            // <Marker
+            //   key={atm.id}
+            //   coordinate={{
+            //     latitude: atm.lat,
+            //     longitude: atm.lng
+            //   }}
+            //   onPress={() => {
+            //     setSelectedAtm(atm);
+            //     setModalVisible(true);
+            //   }}
+            //   title={atm.name_and_loc}
+            // >
+            //   {/* <Image
+            //     source={isClosest ? require('../assets/images/atm-green.png') : require('../assets/images/atm-blue.png')}
+            //     style={{
+            //       width: 55,
+            //       height: 55,
+            //     }}
+            //   /> */}
+            //   <View style={{
+            //     backgroundColor: "white",
+            //     padding: 6,
+            //     borderRadius: 20,
+            //     borderColor: "green",
+            //     borderWidth: 2
+            //   }}>
+            //     <Text style={{ color: "green", fontWeight: "bold" }}>ATM</Text>
+            //   </View>
+            // </Marker>
           )
         })}
 
